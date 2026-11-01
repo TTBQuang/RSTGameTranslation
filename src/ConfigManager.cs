@@ -18,6 +18,8 @@ namespace RSTGameTranslation
         private readonly string _lmstudioConfigFilePath;
         private readonly string _chatgptConfigFilePath;
         private readonly string _mistralConfigFilePath;
+        private readonly string _claudeConfigFilePath;
+        private readonly string _qwenConfigFilePath;
         private readonly string _customApiConfigFilePath;
         private readonly string _googleTranslateConfigFilePath;
         public readonly string _audioProcessingModelFolderPath;
@@ -36,6 +38,8 @@ namespace RSTGameTranslation
         public const string GROQ_API_KEYS = "groq_api_keys";
         public const string CHATGPT_API_KEYS = "chatgpt_api_keys";
         public const string MISTRAL_API_KEYS = "mistral_api_keys";
+        public const string CLAUDE_API_KEYS = "claude_api_keys";
+        public const string QWEN_API_KEYS = "qwen_api_keys";
         public const string GOOGLE_TRANSLATE_API_KEYS = "google_translate_api_keys";
         public const string MICROSOFT_API_KEYS = "microsoft_api_keys";
         public const string MICROSOFT_API_KEY = "microsoft_api_key";
@@ -70,6 +74,10 @@ namespace RSTGameTranslation
         public const string CUSTOM_API_MODEL = "custom_api_model";
         public const string MISTRAL_API_KEY = "mistral_api_key";
         public const string MISTRAL_MODEL = "mistral_model";
+        public const string CLAUDE_API_KEY = "claude_api_key";
+        public const string CLAUDE_MODEL = "claude_model";
+        public const string QWEN_API_KEY = "qwen_api_key";
+        public const string QWEN_MODEL = "qwen_model";
         public const string GROQ_API_KEY = "groq_api_key";
         public const string GROQ_MODEL = "groq_model";
         public const string TRANSLATION_SERVICE = "translation_service";
@@ -320,6 +328,9 @@ namespace RSTGameTranslation
                     "- If a piece is a list of menu options or dialogue choices, put each option on its own line using \\n.\n\n" +
                     "Here is the input JSON:";
 
+        public const string defaultClaudePrompt = defaultMistralPrompt;
+        public const string defaultQwenPrompt = defaultMistralPrompt;
+
         public const string defaultGroqPrompt = "You are an expert video game localizer. Translate the source_language text in the JSON below into target_language.\n" +
                     "The text comes from OCR of a game screenshot and may contain errors (merged or split words, wrong characters, stray symbols).\n\n" +
                     "Input fields:\n" +
@@ -389,6 +400,8 @@ namespace RSTGameTranslation
             _lmstudioConfigFilePath = Path.Combine(appDirectory, "lmstudio_config.txt");
             _chatgptConfigFilePath = Path.Combine(appDirectory, "chatgpt_config.txt");
             _mistralConfigFilePath = Path.Combine(appDirectory, "mistral_config.txt");
+            _claudeConfigFilePath = Path.Combine(appDirectory, "claude_config.txt");
+            _qwenConfigFilePath = Path.Combine(appDirectory, "qwen_config.txt");
             _googleTranslateConfigFilePath = Path.Combine(appDirectory, "google_translate_config.txt");
 
             // Ensure the FunASR model folder exists so the settings UI can enumerate it
@@ -608,6 +621,10 @@ namespace RSTGameTranslation
             _configValues[CHATGPT_API_KEY] = "<your API key here>";
             _configValues[MISTRAL_MODEL] = "open-mistral-nemo";
             _configValues[MISTRAL_API_KEY] = "<your API key here>";
+            _configValues[CLAUDE_MODEL] = "claude-haiku-5-5";
+            _configValues[CLAUDE_API_KEY] = "<your API key here>";
+            _configValues[QWEN_MODEL] = "qwen3.5-flash";
+            _configValues[QWEN_API_KEY] = "<your API key here>";
             _configValues[GROQ_MODEL] = "moonshotai/kimi-k2-instruct-0905";
             _configValues[GROQ_API_KEY] = "<your API key here>";
             _configValues[GEMINI_MODEL] = DEFAULT_GEMINI_MODEL;
@@ -1301,6 +1318,28 @@ namespace RSTGameTranslation
             return GetValue(MISTRAL_API_KEY);
         }
 
+        public string GetClaudeApiKey()
+        {
+            return GetValue(CLAUDE_API_KEY);
+        }
+
+        public void SetClaudeApiKey(string apiKey)
+        {
+            _configValues[CLAUDE_API_KEY] = apiKey;
+            SaveConfig();
+        }
+
+        public string GetQwenApiKey()
+        {
+            return GetValue(QWEN_API_KEY);
+        }
+
+        public void SetQwenApiKey(string apiKey)
+        {
+            _configValues[QWEN_API_KEY] = apiKey;
+            SaveConfig();
+        }
+
         // Set Mistral API key
         public void SetMistralApiKey(string apiKey)
         {
@@ -1472,7 +1511,7 @@ namespace RSTGameTranslation
         // Set current translation service
         public void SetTranslationService(string service)
         {
-            if (service == "Gemini" || service == "Ollama" || service == "ChatGPT" || service == "Google Translate" || service == "Yandex" || service == "Mistral" || service == "LM Studio" || service == "Microsoft" || service == "Groq" || service == "Custom API")
+            if (service == "Gemini" || service == "Ollama" || service == "ChatGPT" || service == "Google Translate" || service == "Yandex" || service == "Mistral" || service == "LM Studio" || service == "Microsoft" || service == "Groq" || service == "Custom API" || service == "Claude" || service == "Qwen")
             {
                 _currentTranslationService = service;
                 _configValues[TRANSLATION_SERVICE] = service;
@@ -1530,6 +1569,14 @@ namespace RSTGameTranslation
             {
                 return defaultMistralPrompt;
             }
+            else if (service == "Claude")
+            {
+                return defaultClaudePrompt;
+            }
+            else if (service == "Qwen")
+            {
+                return defaultQwenPrompt;
+            }
             else if (service == "Ollama")
             {
                 return defaultOllamaPrompt;
@@ -1580,6 +1627,20 @@ namespace RSTGameTranslation
                     string mistralContent = $"<llm_prompt_multi_start>\n{defaultMistralPrompt}\n<llm_prompt_multi_end>";
                     File.WriteAllText(_mistralConfigFilePath, mistralContent);
                     // Console.WriteLine("Created default Mistral config file");
+                }
+
+                // Check and create Claude config file
+                if (!File.Exists(_claudeConfigFilePath))
+                {
+                    string claudeContent = $"<llm_prompt_multi_start>\n{defaultClaudePrompt}\n<llm_prompt_multi_end>";
+                    File.WriteAllText(_claudeConfigFilePath, claudeContent);
+                }
+
+                // Check and create Qwen config file
+                if (!File.Exists(_qwenConfigFilePath))
+                {
+                    string qwenContent = $"<llm_prompt_multi_start>\n{defaultQwenPrompt}\n<llm_prompt_multi_end>";
+                    File.WriteAllText(_qwenConfigFilePath, qwenContent);
                 }
 
                 // Check and create Ollama config file
@@ -1655,6 +1716,12 @@ namespace RSTGameTranslation
                 case "Mistral":
                     filePath = _mistralConfigFilePath;
                     break;
+                case "Claude":
+                    filePath = _claudeConfigFilePath;
+                    break;
+                case "Qwen":
+                    filePath = _qwenConfigFilePath;
+                    break;
                 case "Groq":
                     filePath = _groqConfigFilePath;
                     break;
@@ -1719,6 +1786,12 @@ namespace RSTGameTranslation
                     break;
                 case "Mistral":
                     filePath = _mistralConfigFilePath;
+                    break;
+                case "Claude":
+                    filePath = _claudeConfigFilePath;
+                    break;
+                case "Qwen":
+                    filePath = _qwenConfigFilePath;
                     break;
                 case "Groq":
                     filePath = _groqConfigFilePath;
@@ -3025,6 +3098,38 @@ namespace RSTGameTranslation
             }
         }
 
+        // Get/Set Claude model
+        public string GetClaudeModel()
+        {
+            return GetValue(CLAUDE_MODEL, "claude-haiku-5-5");
+        }
+
+        public void SetClaudeModel(string model)
+        {
+            if (!string.IsNullOrWhiteSpace(model))
+            {
+                _configValues[CLAUDE_MODEL] = model;
+                SaveConfig();
+                Console.WriteLine($"Claude model set to: {model}");
+            }
+        }
+
+        // Get/Set Qwen model
+        public string GetQwenModel()
+        {
+            return GetValue(QWEN_MODEL, "qwen3.5-flash");
+        }
+
+        public void SetQwenModel(string model)
+        {
+            if (!string.IsNullOrWhiteSpace(model))
+            {
+                _configValues[QWEN_MODEL] = model;
+                SaveConfig();
+                Console.WriteLine($"Qwen model set to: {model}");
+            }
+        }
+
         // OCR Display methods
 
         // Check if translation should stay onscreen until replaced
@@ -3085,6 +3190,12 @@ namespace RSTGameTranslation
                     break;
                 case "Mistral":
                     keysConfigKey = MISTRAL_API_KEYS;
+                    break;
+                case "Claude":
+                    keysConfigKey = CLAUDE_API_KEYS;
+                    break;
+                case "Qwen":
+                    keysConfigKey = QWEN_API_KEYS;
                     break;
                 case "Groq":
                     keysConfigKey = GROQ_API_KEYS;
@@ -3158,6 +3269,12 @@ namespace RSTGameTranslation
                 case "Mistral":
                     keysConfigKey = MISTRAL_API_KEYS;
                     break;
+                case "Claude":
+                    keysConfigKey = CLAUDE_API_KEYS;
+                    break;
+                case "Qwen":
+                    keysConfigKey = QWEN_API_KEYS;
+                    break;
                 case "Groq":
                     keysConfigKey = GROQ_API_KEYS;
                     break;
@@ -3225,6 +3342,10 @@ namespace RSTGameTranslation
                     return CHATGPT_API_KEY;
                 case "Mistral":
                     return MISTRAL_API_KEY;
+                case "Claude":
+                    return CLAUDE_API_KEY;
+                case "Qwen":
+                    return QWEN_API_KEY;
                 case "Groq":
                     return GROQ_API_KEY;
                 case "Custom API":
@@ -3595,6 +3716,8 @@ namespace RSTGameTranslation
                 "Custom API" => GetCustomApiModel(),
                 "Groq" => GetGroqModel(),
                 "Mistral" => GetMistralModel(),
+                "Claude" => GetClaudeModel(),
+                "Qwen" => GetQwenModel(),
                 _ => ""
             };
         }

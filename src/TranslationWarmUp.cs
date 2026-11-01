@@ -35,6 +35,8 @@ namespace RSTGameTranslation
                         "ChatGPT" => ChatGptTranslationService.WarmUpConnectionAsync(),
                         "Groq" => GroqTranslationService.WarmUpConnectionAsync(),
                         "Mistral" => MistralTranslationService.WarmUpConnectionAsync(),
+                        "Claude" => ClaudeTranslationService.WarmUpConnectionAsync(),
+                        "Qwen" => QwenTranslationService.WarmUpConnectionAsync(),
                         "Yandex" => YandexTranslationService.WarmUpConnectionAsync(),
                         "Ollama" => OllamaTranslationService.PreloadModelAsync(),
                         _ => Task.CompletedTask

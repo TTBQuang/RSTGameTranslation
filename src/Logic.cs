@@ -2764,8 +2764,30 @@ namespace RSTGameTranslation
                         }
                     }
                 }
-                // Mistral/Groq/Custom API format: choices[0].message.content
-                else if (currentService == "Mistral" || currentService == "Groq" || currentService == "Custom API")
+                // Claude (Anthropic Messages API) format: content[0].text
+                else if (currentService == "Claude")
+                {
+                    if (root.TryGetProperty("content", out JsonElement claudeContent) &&
+                        claudeContent.ValueKind == JsonValueKind.Array &&
+                        claudeContent.GetArrayLength() > 0 &&
+                        claudeContent[0].TryGetProperty("text", out JsonElement claudeText))
+                    {
+                        var text = claudeText.GetString();
+                        if (text != null && text.Contains("\"text_blocks\""))
+                        {
+                            int jsonStart = text.IndexOf('{');
+                            int jsonEnd = text.LastIndexOf('}');
+                            if (jsonStart >= 0 && jsonEnd > jsonStart)
+                            {
+                                return (text.Substring(jsonStart, jsonEnd - jsonStart + 1), false);
+                            }
+                        }
+                        // Return raw text if no JSON found
+                        return (text, false);
+                    }
+                }
+                // Mistral/Groq/Qwen/Custom API format: choices[0].message.content
+                else if (currentService == "Mistral" || currentService == "Groq" || currentService == "Qwen" || currentService == "Custom API")
                 {
                     if (root.TryGetProperty("choices", out JsonElement choices) &&
                         choices.GetArrayLength() > 0)

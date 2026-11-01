@@ -378,6 +378,18 @@ namespace RSTGameTranslation
                         Console.WriteLine($"Prompt saved for Mistral");
                     }
                 }
+                // Claude
+                string claude_prompt = ConfigManager.Instance.GetDefaultServicePrompt("Claude");
+                if (!string.IsNullOrWhiteSpace(claude_prompt))
+                {
+                    ConfigManager.Instance.SaveServicePrompt("Claude", claude_prompt);
+                }
+                // Qwen
+                string qwen_prompt = ConfigManager.Instance.GetDefaultServicePrompt("Qwen");
+                if (!string.IsNullOrWhiteSpace(qwen_prompt))
+                {
+                    ConfigManager.Instance.SaveServicePrompt("Qwen", qwen_prompt);
+                }
                 // Groq
                 string groq_prompt = ConfigManager.Instance.GetDefaultServicePrompt("Groq");
                 if (!string.IsNullOrWhiteSpace(groq_prompt))

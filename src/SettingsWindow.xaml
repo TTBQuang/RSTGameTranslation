@@ -394,6 +394,8 @@
                                     <ComboBoxItem Content="Ollama"/>
                                     <ComboBoxItem Content="ChatGPT"/>
                                     <ComboBoxItem Content="Mistral"/>
+                                    <ComboBoxItem Content="Claude"/>
+                                    <ComboBoxItem Content="Qwen"/>
                                     <ComboBoxItem Content="Google Translate"/>
                                     <ComboBoxItem Content="Yandex"/>
                                     <ComboBoxItem Content="LM Studio"/>
@@ -617,6 +619,95 @@
                                     <TextBlock x:Name="mistralApiKeyHelpText" Grid.Row="2" TextWrapping="Wrap" Margin="0,2,0,5" FontSize="11">
                                         <Run>Get API key from (need login mistral AI website before click this link) </Run>
                                         <Hyperlink Click="MistralApiLink_Click">https://admin.mistral.ai/organization/api-keys</Hyperlink>
+                                    </TextBlock>
+                                </Grid>
+                                
+                                <!-- Claude Model - Only visible when Claude is selected -->
+                                <TextBlock x:Name="claudeModelLabel" Text="Claude Model:" Grid.Row="2" Grid.Column="0" 
+                                          VerticalAlignment="Center" Margin="0,5,10,0"/>
+                                <Grid Grid.Row="2" Grid.Column="1" Margin="0,5" x:Name="claudeModelGrid">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="claudeModelComboBox" Grid.Column="0"
+                                            SelectionChanged="ClaudeModelComboBox_SelectionChanged"
+                                            LostFocus="ClaudeModelComboBox_LostFocus"
+                                            IsEditable="True"
+                                            Foreground="{DynamicResource TextBrush}">
+                                        <ComboBoxItem Content="claude-haiku-5-5"/>
+                                        <ComboBoxItem Content="claude-sonnet-5-5"/>
+                                        <ComboBoxItem Content="claude-opus-5-5"/>
+                                    </ComboBox>
+                                    <Button x:Name="viewClaudeModelsButton" Content="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Btn_ViewModels]}" Grid.Column="1"
+                                           Margin="5,0,0,0" Padding="5,0" Click="ViewClaudeModelsButton_Click"
+                                           ToolTip="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Tip_ClaudeDocs]}"/>
+                                </Grid>
+
+                                <!-- Claude API Key - Only visible when Claude is selected -->
+                                <TextBlock x:Name="claudeApiKeyLabel" Text="Claude API Key:" Grid.Row="1" Grid.Column="0" 
+                                          VerticalAlignment="Top" Margin="0,8,10,0"/>
+                                <Grid Grid.Row="1" Grid.Column="1" Margin="0,5,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <PasswordBox x:Name="claudeApiKeyPasswordBox" Grid.Row="0"
+                                             VerticalAlignment="Top" Margin="0,0,0,2" 
+                                             PasswordChanged="ClaudeApiKeyPasswordBox_PasswordChanged" KeyDown="ApiKeyPasswordBox_KeyDown" 
+                                             Tag="Claude"/>
+                                    <Button x:Name="viewClaudeKeysButton" Content="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Btn_ViewKeys]}" Grid.Row="1" HorizontalAlignment="Right"
+                                             Click="ViewApiKeysButton_Click" Tag="Claude" Width="70"/>
+                                    <Button x:Name="SaveClaudeKeysButton" Content="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Btn_SaveKeys]}" Grid.Row="1" Tag="Claude"
+                                            HorizontalAlignment="Left" Width="70" Click="SaveApiKeysButton_Click" />
+                                    <TextBlock x:Name="claudeApiKeyHelpText" Grid.Row="2" TextWrapping="Wrap" Margin="0,2,0,5" FontSize="11">
+                                        <Run>Get API key from </Run>
+                                        <Hyperlink Click="ClaudeApiLink_Click">https://console.anthropic.com/settings/keys</Hyperlink>
+                                    </TextBlock>
+                                </Grid>
+                                
+                                <!-- Qwen Model - Only visible when Qwen is selected -->
+                                <TextBlock x:Name="qwenModelLabel" Text="Qwen Model:" Grid.Row="2" Grid.Column="0" 
+                                          VerticalAlignment="Center" Margin="0,5,10,0"/>
+                                <Grid Grid.Row="2" Grid.Column="1" Margin="0,5" x:Name="qwenModelGrid">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="qwenModelComboBox" Grid.Column="0"
+                                            SelectionChanged="QwenModelComboBox_SelectionChanged"
+                                            LostFocus="QwenModelComboBox_LostFocus"
+                                            IsEditable="True"
+                                            Foreground="{DynamicResource TextBrush}">
+                                        <ComboBoxItem Content="qwen3.5-flash"/>
+                                        <ComboBoxItem Content="qwen2.5-72b-instruct"/>
+                                    </ComboBox>
+                                    <Button x:Name="viewQwenModelsButton" Content="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Btn_ViewModels]}" Grid.Column="1"
+                                           Margin="5,0,0,0" Padding="5,0" Click="ViewQwenModelsButton_Click"
+                                           ToolTip="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Tip_QwenDocs]}"/>
+                                </Grid>
+
+                                <!-- Qwen API Key - Only visible when Qwen is selected -->
+                                <TextBlock x:Name="qwenApiKeyLabel" Text="Qwen API Key:" Grid.Row="1" Grid.Column="0" 
+                                          VerticalAlignment="Top" Margin="0,8,10,0"/>
+                                <Grid Grid.Row="1" Grid.Column="1" Margin="0,5,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <PasswordBox x:Name="qwenApiKeyPasswordBox" Grid.Row="0"
+                                             VerticalAlignment="Top" Margin="0,0,0,2" 
+                                             PasswordChanged="QwenApiKeyPasswordBox_PasswordChanged" KeyDown="ApiKeyPasswordBox_KeyDown" 
+                                             Tag="Qwen"/>
+                                    <Button x:Name="viewQwenKeysButton" Content="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Btn_ViewKeys]}" Grid.Row="1" HorizontalAlignment="Right"
+                                             Click="ViewApiKeysButton_Click" Tag="Qwen" Width="70"/>
+                                    <Button x:Name="SaveQwenKeysButton" Content="{Binding Source={x:Static local:LocalizationManager.Instance}, Path=Strings[Btn_SaveKeys]}" Grid.Row="1" Tag="Qwen"
+                                            HorizontalAlignment="Left" Width="70" Click="SaveApiKeysButton_Click" />
+                                    <TextBlock x:Name="qwenApiKeyHelpText" Grid.Row="2" TextWrapping="Wrap" Margin="0,2,0,5" FontSize="11">
+                                        <Run>Get API key from </Run>
+                                        <Hyperlink Click="QwenApiLink_Click">https://bailian.console.alibabacloud.com/?apiKey=1</Hyperlink>
                                     </TextBlock>
                                 </Grid>
                                 

@@ -802,6 +802,12 @@ namespace RSTGameTranslation
                     case "Mistral":
                         passwordBox = mistralApiKeyPasswordBox;
                         break;
+                    case "Claude":
+                        passwordBox = claudeApiKeyPasswordBox;
+                        break;
+                    case "Qwen":
+                        passwordBox = qwenApiKeyPasswordBox;
+                        break;
                     case "Groq":
                         passwordBox = groqApiKeyPasswordBox;
                         break;
@@ -2176,6 +2182,8 @@ namespace RSTGameTranslation
                 bool isCustomApiSelected = selectedService == "Custom API";
                 bool isChatGptSelected = selectedService == "ChatGPT";
                 bool isMistralSelected = selectedService == "Mistral";
+                bool isClaudeSelected = selectedService == "Claude";
+                bool isQwenSelected = selectedService == "Qwen";
                 bool isGoogleTranslateSelected = selectedService == "Google Translate";
                 bool isYandexSelected = selectedService == "Yandex";
                 bool isGroqSelected = selectedService == "Groq";
@@ -2199,6 +2207,10 @@ namespace RSTGameTranslation
                     groqModelLabel == null || groqModelGrid == null ||
                     mistralApiKeyLabel == null || mistralApiKeyPasswordBox == null ||
                     mistralModelLabel == null || mistralModelGrid == null ||
+                    claudeApiKeyLabel == null || claudeApiKeyPasswordBox == null ||
+                    claudeModelLabel == null || claudeModelGrid == null ||
+                    qwenApiKeyLabel == null || qwenApiKeyPasswordBox == null ||
+                    qwenModelLabel == null || qwenModelGrid == null ||
                     chatGptApiKeyLabel == null || chatGptApiKeyGrid == null ||
                     chatGptModelLabel == null || chatGptModelGrid == null ||
                     googleTranslateApiKeyLabel == null || googleTranslateApiKeyGrid == null ||
@@ -2250,6 +2262,24 @@ namespace RSTGameTranslation
                 mistralModelGrid.Visibility = isMistralSelected ? Visibility.Visible : Visibility.Collapsed;
                 viewMistralKeysButton.Visibility = isMistralSelected ? Visibility.Visible : Visibility.Collapsed;
                 SaveMistralKeysButton.Visibility = isMistralSelected ? Visibility.Visible : Visibility.Collapsed;
+
+                // Show/hide Claude-specific settings
+                claudeApiKeyLabel.Visibility = isClaudeSelected ? Visibility.Visible : Visibility.Collapsed;
+                claudeApiKeyPasswordBox.Visibility = isClaudeSelected ? Visibility.Visible : Visibility.Collapsed;
+                claudeApiKeyHelpText.Visibility = isClaudeSelected ? Visibility.Visible : Visibility.Collapsed;
+                claudeModelLabel.Visibility = isClaudeSelected ? Visibility.Visible : Visibility.Collapsed;
+                claudeModelGrid.Visibility = isClaudeSelected ? Visibility.Visible : Visibility.Collapsed;
+                viewClaudeKeysButton.Visibility = isClaudeSelected ? Visibility.Visible : Visibility.Collapsed;
+                SaveClaudeKeysButton.Visibility = isClaudeSelected ? Visibility.Visible : Visibility.Collapsed;
+
+                // Show/hide Qwen-specific settings
+                qwenApiKeyLabel.Visibility = isQwenSelected ? Visibility.Visible : Visibility.Collapsed;
+                qwenApiKeyPasswordBox.Visibility = isQwenSelected ? Visibility.Visible : Visibility.Collapsed;
+                qwenApiKeyHelpText.Visibility = isQwenSelected ? Visibility.Visible : Visibility.Collapsed;
+                qwenModelLabel.Visibility = isQwenSelected ? Visibility.Visible : Visibility.Collapsed;
+                qwenModelGrid.Visibility = isQwenSelected ? Visibility.Visible : Visibility.Collapsed;
+                viewQwenKeysButton.Visibility = isQwenSelected ? Visibility.Visible : Visibility.Collapsed;
+                SaveQwenKeysButton.Visibility = isQwenSelected ? Visibility.Visible : Visibility.Collapsed;
 
                 // Show/hide Ollama-specific settings
                 ollamaUrlLabel.Visibility = isOllamaSelected ? Visibility.Visible : Visibility.Collapsed;
@@ -2422,6 +2452,68 @@ namespace RSTGameTranslation
 
                     // Reattach event handler
                     mistralModelComboBox.SelectionChanged += MistralModelComboBox_SelectionChanged;
+                }
+                else if (isClaudeSelected)
+                {
+                    claudeApiKeyPasswordBox.Password = ConfigManager.Instance.GetClaudeApiKey();
+
+                    // Set selected Claude model
+                    string claudeModel = ConfigManager.Instance.GetClaudeModel();
+
+                    // Temporarily remove event handlers to avoid triggering changes
+                    claudeModelComboBox.SelectionChanged -= ClaudeModelComboBox_SelectionChanged;
+
+                    // First try to find exact match in dropdown items
+                    bool found = false;
+                    foreach (ComboBoxItem item in claudeModelComboBox.Items)
+                    {
+                        if (string.Equals(item.Content?.ToString(), claudeModel, StringComparison.OrdinalIgnoreCase))
+                        {
+                            claudeModelComboBox.SelectedItem = item;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    // If not found in dropdown, set as custom text
+                    if (!found)
+                    {
+                        claudeModelComboBox.Text = claudeModel;
+                    }
+
+                    // Reattach event handler
+                    claudeModelComboBox.SelectionChanged += ClaudeModelComboBox_SelectionChanged;
+                }
+                else if (isQwenSelected)
+                {
+                    qwenApiKeyPasswordBox.Password = ConfigManager.Instance.GetQwenApiKey();
+
+                    // Set selected Qwen model
+                    string qwenModel = ConfigManager.Instance.GetQwenModel();
+
+                    // Temporarily remove event handlers to avoid triggering changes
+                    qwenModelComboBox.SelectionChanged -= QwenModelComboBox_SelectionChanged;
+
+                    // First try to find exact match in dropdown items
+                    bool found = false;
+                    foreach (ComboBoxItem item in qwenModelComboBox.Items)
+                    {
+                        if (string.Equals(item.Content?.ToString(), qwenModel, StringComparison.OrdinalIgnoreCase))
+                        {
+                            qwenModelComboBox.SelectedItem = item;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    // If not found in dropdown, set as custom text
+                    if (!found)
+                    {
+                        qwenModelComboBox.Text = qwenModel;
+                    }
+
+                    // Reattach event handler
+                    qwenModelComboBox.SelectionChanged += QwenModelComboBox_SelectionChanged;
                 }
                 else if (isMicrosoftSelected)
                 {
@@ -2801,6 +2893,32 @@ namespace RSTGameTranslation
             }
         }
 
+        // Claude API Key changed
+        private void ClaudeApiKeyPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Console.WriteLine("Claude API key updated");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Claude API key: {ex.Message}");
+            }
+        }
+
+        // Qwen API Key changed
+        private void QwenApiKeyPasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Console.WriteLine("Qwen API key updated");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Qwen API key: {ex.Message}");
+            }
+        }
+
         // Ollama URL changed
         private void OllamaUrlTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -2987,6 +3105,16 @@ namespace RSTGameTranslation
         private void MistralApiLink_Click(object sender, RoutedEventArgs e)
         {
             OpenUrl("https://docs.mistral.ai/getting-started");
+        }
+
+        private void ClaudeApiLink_Click(object sender, RoutedEventArgs e)
+        {
+            OpenUrl("https://console.anthropic.com/settings/keys");
+        }
+
+        private void QwenApiLink_Click(object sender, RoutedEventArgs e)
+        {
+            OpenUrl("https://bailian.console.alibabacloud.com/?apiKey=1");
         }
 
         private void GeminiModelComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -3222,6 +3350,98 @@ namespace RSTGameTranslation
             }
         }
 
+        private void ClaudeModelComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                // Skip if initializing
+                if (_isInitializing)
+                    return;
+
+                string model;
+
+                // Handle both dropdown selection and manually typed values
+                if (claudeModelComboBox.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    model = selectedItem.Content?.ToString() ?? "claude-haiku-5-5";
+                }
+                else
+                {
+                    // For manually entered text
+                    model = claudeModelComboBox.Text?.Trim() ?? "claude-haiku-5-5";
+                }
+
+                if (!string.IsNullOrWhiteSpace(model))
+                {
+                    // Save to config
+                    ConfigManager.Instance.SetClaudeModel(model);
+                    Console.WriteLine($"Claude model set to: {model}");
+
+                    // Trigger retranslation if the current service is Claude
+                    if (ConfigManager.Instance.GetCurrentTranslationService() == "Claude")
+                    {
+                        Console.WriteLine("Claude model changed. Triggering retranslation...");
+
+                        // Reset the hash to force a retranslation
+                        Logic.Instance.ResetHash();
+
+                        // Clear any existing text objects to refresh the display
+                        Logic.Instance.ClearAllTextObjects();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Claude model: {ex.Message}");
+            }
+        }
+
+        private void QwenModelComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                // Skip if initializing
+                if (_isInitializing)
+                    return;
+
+                string model;
+
+                // Handle both dropdown selection and manually typed values
+                if (qwenModelComboBox.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    model = selectedItem.Content?.ToString() ?? "qwen3.5-flash";
+                }
+                else
+                {
+                    // For manually entered text
+                    model = qwenModelComboBox.Text?.Trim() ?? "qwen3.5-flash";
+                }
+
+                if (!string.IsNullOrWhiteSpace(model))
+                {
+                    // Save to config
+                    ConfigManager.Instance.SetQwenModel(model);
+                    Console.WriteLine($"Qwen model set to: {model}");
+
+                    // Trigger retranslation if the current service is Qwen
+                    if (ConfigManager.Instance.GetCurrentTranslationService() == "Qwen")
+                    {
+                        Console.WriteLine("Qwen model changed. Triggering retranslation...");
+
+                        // Reset the hash to force a retranslation
+                        Logic.Instance.ResetHash();
+
+                        // Clear any existing text objects to refresh the display
+                        Logic.Instance.ClearAllTextObjects();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Qwen model: {ex.Message}");
+            }
+        }
+
         private void ViewGeminiModelsButton_Click(object sender, RoutedEventArgs e)
         {
             OpenUrl("https://ai.google.dev/gemini-api/docs/models");
@@ -3235,6 +3455,16 @@ namespace RSTGameTranslation
         private void ViewMistralModelsButton_Click(object sender, RoutedEventArgs e)
         {
             OpenUrl("https://docs.mistral.ai/getting-started/models/models_overview/");
+        }
+
+        private void ViewClaudeModelsButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenUrl("https://docs.anthropic.com/en/docs/about-claude/models");
+        }
+
+        private void ViewQwenModelsButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenUrl("https://www.alibabacloud.com/help/en/model-studio/models");
         }
 
         private void GeminiModelComboBox_LostFocus(object sender, RoutedEventArgs e)
@@ -3628,6 +3858,72 @@ namespace RSTGameTranslation
             catch (Exception ex)
             {
                 Console.WriteLine($"Error updating Mistral model from text input: {ex.Message}");
+            }
+        }
+
+        private void ClaudeModelComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Skip if initializing
+                if (_isInitializing)
+                    return;
+
+                string model = claudeModelComboBox.Text?.Trim() ?? "";
+
+                if (!string.IsNullOrWhiteSpace(model))
+                {
+                    // Save to config
+                    ConfigManager.Instance.SetClaudeModel(model);
+                    Console.WriteLine($"Claude model set from text input to: {model}");
+
+                    // Trigger retranslation if the current service is Claude
+                    if (ConfigManager.Instance.GetCurrentTranslationService() == "Claude")
+                    {
+                        // Reset the hash to force a retranslation
+                        Logic.Instance.ResetHash();
+
+                        // Clear any existing text objects to refresh the display
+                        Logic.Instance.ClearAllTextObjects();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Claude model from text input: {ex.Message}");
+            }
+        }
+
+        private void QwenModelComboBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Skip if initializing
+                if (_isInitializing)
+                    return;
+
+                string model = qwenModelComboBox.Text?.Trim() ?? "";
+
+                if (!string.IsNullOrWhiteSpace(model))
+                {
+                    // Save to config
+                    ConfigManager.Instance.SetQwenModel(model);
+                    Console.WriteLine($"Qwen model set from text input to: {model}");
+
+                    // Trigger retranslation if the current service is Qwen
+                    if (ConfigManager.Instance.GetCurrentTranslationService() == "Qwen")
+                    {
+                        // Reset the hash to force a retranslation
+                        Logic.Instance.ResetHash();
+
+                        // Clear any existing text objects to refresh the display
+                        Logic.Instance.ClearAllTextObjects();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating Qwen model from text input: {ex.Message}");
             }
         }
 
